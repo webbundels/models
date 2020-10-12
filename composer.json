@@ -1,0 +1,21 @@
+{
+    "name": "webbundels/models",
+    "description": "Webbundels models",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+      {
+        "name": "Nick van Leeuwen",
+        "email": "nick@webbundels.nl"
+      }
+    ],
+    "require": {
+        "orchestra/testbench": "^5.0"
+    },
+
+    "autoload": {
+      "psr-4": {
+        "Webbundels\\Models\\": "src"
+      }
+    }
+  }

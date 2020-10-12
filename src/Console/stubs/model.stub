@@ -1,0 +1,10 @@
+<?php
+
+namespace App\Models;
+
+class DummyClass extends AbstractModel
+{
+    public $timestamps = false;
+    
+    protected $fillable = [];
+}

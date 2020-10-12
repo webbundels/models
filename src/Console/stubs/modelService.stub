@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Services\ModelServices;
+
+use App\Repositories\DummyRepositoryClass;
+
+class DummyClass extends AbstractModelService
+{
+    public function __construct(DummyRepositoryClass $repo)
+    {
+        $this->repo = $repo;
+    }
+}
