@@ -17,5 +17,12 @@
       "psr-4": {
         "Webbundels\\Models\\": "src"
       }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webbundels\\Models\\WebbundelsModelsServiceProvider"
+            ]
+        }
     }
   }
