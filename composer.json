@@ -9,7 +9,7 @@
         "email": "nick@webbundels.nl"
       }
     ],
-    "require": {
+    "require-dev": {
         "orchestra/testbench": "^5.0"
     },
 
