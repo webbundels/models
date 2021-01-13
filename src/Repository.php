@@ -35,7 +35,7 @@ abstract class Repository {
 
     public function getByIds($ids, array $with = [])
     {
-        return $this->getAllFiltered(['ids' => $ids], $with);
+        return $this->get(['ids' => $ids], $with);
     }
 
     public function getByName($name, array $with = [])
@@ -98,6 +98,10 @@ abstract class Repository {
 
     public function firstOrStore(array $data, array $delayed_data = []) {
         return (new $this->model)->firstOrCreate($data, $delayed_data);
+    }
+
+    public function updateOrCreate(array $data, array $delayed_data = []) {
+        return (new $this->model)->updateOrCreate($data, $delayed_data);
     }
 
     public function update($id, array $data, array $with = [])
