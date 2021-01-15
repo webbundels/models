@@ -48,8 +48,12 @@ abstract class Repository {
         return $this->pluck('id', $filters);
     }
 
-    public function pluck(string $column, array $filters = [])
+    public function pluck($column, array $filters = [])
     {
+        if (is_array($column)) {
+            return (new $this->model)->filter($filters)->select($column[0], $column[1])->pluck($column[0], $column[1]);
+        }
+
         return (new $this->model)->filter($filters)->select($column)->pluck($column);
     }
 
