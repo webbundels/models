@@ -4,10 +4,13 @@ namespace Webbundels\Models;
 
 use Illuminate\Support\ServiceProvider;
 use Webbundels\Models\Console\ModelMakeCommand;
+use Webbundels\Models\Console\ModelMakeJsCommand;
 use Webbundels\Models\Console\ResourceMakeCommand;
 use Webbundels\Models\Console\RepositoryMakeCommand;
 use Webbundels\Models\Console\ModelClassesMakeCommand;
 use Webbundels\Models\Console\ModelServiceMakeCommand;
+use Webbundels\Models\Console\ModelServiceJsMakeCommand;
+use Webbundels\Models\Console\ModelClassesPhpMakeCommand;
 
 class WebbundelsModelsServiceProvider extends ServiceProvider
 {
@@ -22,7 +25,10 @@ class WebbundelsModelsServiceProvider extends ServiceProvider
                 ModelServiceMakeCommand::class,
                 RepositoryMakeCommand::class,
                 ModelClassesMakeCommand::class,
-                ResourceMakeCommand::class
+                ModelClassesPhpMakeCommand::class,
+                ResourceMakeCommand::class,
+                ModelServiceJsMakeCommand::class,
+                ModelMakeJsCommand::class,
             ]);
         }
     }

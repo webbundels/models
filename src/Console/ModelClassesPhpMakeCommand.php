@@ -5,14 +5,14 @@ namespace Webbundels\Models\Console;
 use Illuminate\Support\Str;
 use Illuminate\Console\GeneratorCommand;
 
-class ModelClassesMakeCommand extends GeneratorCommand
+class ModelClassesPhpMakeCommand extends GeneratorCommand
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'wb:make:model-classes';
+    protected $name = 'wb:make:php-model-classes';
 
     /**
      * The console command description.
@@ -63,14 +63,6 @@ class ModelClassesMakeCommand extends GeneratorCommand
         $this->call('wb:make:resource', [
             'name' => $plural . '/' . $singular . 'Collection',
             '--collection'
-        ]);
-
-        $this->call('wb:make:model-service-js', [
-            'name' => $singular
-        ]);
-
-        $this->call('wb:make:model-js', [
-            'name' => $singular
         ]);
 
         // Create the migration file from the string 'name'.

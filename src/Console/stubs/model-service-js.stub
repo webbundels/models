@@ -1,0 +1,15 @@
+import DummyModelClass from "../../models/dummy-model-class";
+import { AbstractHttpService } from "./abstract-http-service";
+
+class DummyClass extends AbstractHttpService {
+
+    endpoint() {
+        return 'dummy-url';
+    }
+
+    createModel(data) {
+        return new DummyModelClass(data);
+    }
+}
+
+export default new DummyClass;
