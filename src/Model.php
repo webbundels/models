@@ -54,7 +54,7 @@ abstract class Model extends LaravelModel
         foreach($with as $key => $value) { 
 
             // Add withCount statement to the array 'withCount'.
-            list($with, $withCount) = $this->addWithCountStatementToQuery(
+            list($with, $withCount, $foundWithCount) = $this->addWithCountStatementToQuery(
                 $key, $value, $with, $withCount
             );
             
@@ -62,7 +62,7 @@ abstract class Model extends LaravelModel
             // Then: Add 'key' as key to the given array 'with',
             // with as value an closure that filters the 'key' relation 
             // with the filter function.
-            if (is_array($value)) {
+            if (is_array($value) and ! $foundWithCount) {
                 $with[$key] = function($q) use ($value) {
                     return $q->filter($value);
                 };
@@ -81,6 +81,7 @@ abstract class Model extends LaravelModel
     // and remove the current key/value pair from the given array 'with'.
     protected function addWithCountStatementToQuery($key, $value, $with, $withCount)
     {
+        $foundWithCount = false;
         if (Str::contains($key, 'count') and ! Str::contains($key, 'country')) {
             if (Str::contains($key, '.')) {
                 $relation = Str::before($key, '.count');
@@ -100,6 +101,7 @@ abstract class Model extends LaravelModel
                 };
             }
             unset($with[$key]);
+            $foundWithCount = true;
         } elseif (is_string($value) and Str::contains($value, 'count') and ! Str::contains($value, 'country')) {
             if (Str::contains($value, '.')) {
                 $relation = Str::before($value, '.count');
@@ -112,9 +114,10 @@ abstract class Model extends LaravelModel
                 $withCount[] = $relation;
             }
             unset($with[$key]);
+            $foundWithCount = true;
         }
 
-        return [$with, $withCount];
+        return [$with, $withCount, $foundWithCount];
     }
 
     // Check given 'key' and 'value' on default filters.
