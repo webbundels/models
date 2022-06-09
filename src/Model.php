@@ -82,7 +82,7 @@ abstract class Model extends LaravelModel
     protected function addWithCountStatementToQuery($key, $value, $with, $withCount)
     {
         $foundWithCount = false;
-        if (Str::contains($key, 'count') and ! Str::contains($key, 'country')) {
+        if (Str::contains($key, 'count') and ! Str::contains($key, 'country') and ! Str::contains($key, 'account')) {
             if (Str::contains($key, '.')) {
                 $relation = Str::before($key, '.count');
                 $innerRelation = lcFirst(Str::after($key, '.count'));
@@ -102,7 +102,7 @@ abstract class Model extends LaravelModel
             }
             unset($with[$key]);
             $foundWithCount = true;
-        } elseif (is_string($value) and Str::contains($value, 'count') and ! Str::contains($value, 'country')) {
+        } elseif (is_string($value) and Str::contains($value, 'count') and ! Str::contains($value, 'country') and ! Str::contains($value, 'account')) {
             if (Str::contains($value, '.')) {
                 $relation = Str::before($value, '.count');
                 $innerRelation = lcFirst(Str::after($value, '.count'));
