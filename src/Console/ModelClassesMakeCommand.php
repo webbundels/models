@@ -96,7 +96,7 @@ class ModelClassesMakeCommand extends GeneratorCommand
     // function 'getServiceBinding' to the register method.
     public function appendBindingTextToContent($content, $name)
     {
-        $searchFor = 'public function register()
+        $searchFor = 'public function register(): void
     {';
         return str_replace($searchFor, $searchFor . '
         ' . $this->getServiceBinding($name), $content);
