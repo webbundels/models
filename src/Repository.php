@@ -182,7 +182,7 @@ abstract class Repository {
     public function destroyMany(array $ids, $forceDelete = false) 
     {
         if ($forceDelete) {
-            return (new $this->model)->forceDelete($ids);
+            return (new $this->model)->whereIn('id', $ids)->forceDelete();
         }
 
         return (new $this->model)->whereIn('id', $ids)->delete();
