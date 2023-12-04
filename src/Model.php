@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model as LaravelModel;
 
 abstract class Model extends LaravelModel
 {
+
     public function scopeFilter($query, $filters = [])
     {
         // Filter trough default column filters
@@ -17,12 +18,12 @@ abstract class Model extends LaravelModel
 
         // Loop trough all filters, check and preform some default filters.
         foreach ($filters as $key => $value) {
-            
+
             // Preform default filters on the given 'value'.
             if (is_string($value)) {
                 $query = $this->filtersOnValue($query, $value);
             }
-            
+
             // If 'key' isn't a string: there is nothing to filter on so go to next filter
             if (! is_string($key)) continue;
 
@@ -37,6 +38,7 @@ abstract class Model extends LaravelModel
         $query = $this->addTakeStatementToQuery($query, $filters);
         $query = $this->addSkipStatementToQuery($query, $filters);
         $query = $this->addWithTrashedStatementToQuery($query, $filters);
+        $query = $this->addOnlyTrashedStatementToQuery($query, $filters);
         $query = $this->addWithoutScopeStatementToQuery($query, $filters);
         $query = $this->addWithoutScopesStatementToQuery($query, $filters);
         $query = $this->addOrderByStatementToQuery($query, $filters);
@@ -49,18 +51,18 @@ abstract class Model extends LaravelModel
     {
         $relationWheres = [];
         $withCount = [];
-        
+
         // Loop trough all 'with' values.
-        foreach($with as $key => $value) { 
+        foreach($with as $key => $value) {
 
             // Add withCount statement to the array 'withCount'.
             list($with, $withCount, $foundWithCount) = $this->addWithCountStatementToQuery(
                 $key, $value, $with, $withCount
             );
-            
+
             // If 'value' is an array.
             // Then: Add 'key' as key to the given array 'with',
-            // with as value an closure that filters the 'key' relation 
+            // with as value an closure that filters the 'key' relation
             // with the filter function.
             if (is_array($value) and ! $foundWithCount) {
                 $with[$key] = function($q) use ($value) {
@@ -72,7 +74,7 @@ abstract class Model extends LaravelModel
         if ($withCount) {
             $query = $query->withCount($withCount);
         }
-        
+
         return $query->with($with);
     }
 
@@ -86,7 +88,7 @@ abstract class Model extends LaravelModel
             if (Str::contains($key, '.')) {
                 $relation = Str::before($key, '.count');
                 $innerRelation = lcFirst(Str::after($key, '.count'));
-                
+
                 $with[$relation] = function($query) use ($innerRelation, $value) {
                     return $query->withCount([
                         $innerRelation => function($q) use ($value) {
@@ -133,15 +135,18 @@ abstract class Model extends LaravelModel
     protected function filtersOnKeyAndValue($query, $key, $value)
     {
         // If the given 'key' does not contain _is in the given 'key': return the given 'query'.
-        if (! Str::contains($key, '_is')) return $query;
+        if (! Str::contains($key, ['_is', '_>', '_<'])) return $query;
 
-        $not = Str::contains($key, '_not');
-        $equal = Str::contains($key, '_equal');
-    
-        $query = $this->filterOnGreaterThan($query, $key, $value, $equal, $not);
-        $query = $this->filterOnLessThan($query, $key, $value, $equal, $not);
-        $query = $this->filterOnEqual($query, $key, $value, $not);
-        $query = $this->filterOnIsInArray($query, $key, $value, $not);
+        $not = Str::contains($key, ['_not', '_!=']);
+        $equal = Str::contains($key, ['_equal', '_<=', '_>=']);
+
+        $query = $this->filterOnGreaterThan($query, $key, $value, $equal);
+        $query = $this->filterOnLessThan($query, $key, $value, $equal);
+        if (! is_array($value)) {
+            $query = $this->filterOnEqual($query, $key, $value, $not);
+        } else {
+            $query = $this->filterOnIsInArray($query, $key, $value, $not);
+        }
 
         return $query;
     }
@@ -149,20 +154,15 @@ abstract class Model extends LaravelModel
 
     // If the given string 'key' ends with an version of _greater_than.
     // Then: Add the corresponding where statement to the given 'query'.
-    protected function filterOnGreaterThan($query, string $key, $value, bool $equal = false, bool $not = false)
+    protected function filterOnGreaterThan($query, string $key, $value, bool $equal = false)
     {
-        $type = $not ? '_is_not_greater_than' : '_is_greater_than';
-        if ($equal) {
-            $type = $not ? '_is_not_greater_or_equal_than' : '_is_greater_or_equal_than';
-        }
+        $type = $equal ? ['_>=', '_is_greater_or_equal_than'] : ['_>', '_greater_than'];
 
         if (Str::endsWith($key, $type)) {
+            $type = Str::endsWith($key, $type[0]) ? $type[0] : $type[1];
             $column = $this->getTable() . '.' . Str::before($key, $type);
 
-            $operator = $not ? '<=' : '>';
-            if ($equal) {
-                $operator = $not ? '<' : '>=';
-            }
+            $operator = $equal ? '>=' : '>';
 
             $query = $query->where($column, $operator, $value);
         }
@@ -172,19 +172,14 @@ abstract class Model extends LaravelModel
 
     // If the given string 'key' ends with an version of _lesser_than.
     // Then: Add the corresponding where statement to the given 'query'.
-    protected function filterOnLessThan($query, string $key, $value, bool $equal = false, bool $not = false)
-    { 
-        $type = $not ? '_is_not_lower_than' : '_is_lower_than';
-        if ($equal) {
-            $type = $not ? '_is_not_lower_or_equal_than' : '_is_lower_or_equal_than';
-        }
+    protected function filterOnLessThan($query, string $key, $value, bool $equal = false)
+    {
+        $type = $equal ? ['_<=', '_is_lower_or_equal_than'] : ['_<', '_is_lower_than'];
 
         if (Str::endsWith($key, $type)) {
+            $type = Str::endsWith($key, $type[0]) ? $type[0] : $type[1];
             $column = $this->getTable() . '.' . Str::before($key, $type);
-            $operator = $not ? '>=' : '<';
-            if ($equal) {
-                $operator = $not ? '>' : '<=';
-            }
+            $operator = $equal ? '<=' : '<';
 
             $query = $query->where($column, $operator, $value);
         }
@@ -194,11 +189,12 @@ abstract class Model extends LaravelModel
 
     // If the given string 'key' ends with _is or _is_not.
     // Then: Add an = or != where statement to the given 'query'.
-    protected function filterOnEqual($query, string $key, $value, bool $not = false) 
+    protected function filterOnEqual($query, string $key, $value, bool $not = false)
     {
-        $type = $not ? '_is_not' : '_is';
+        $type = $not ? ['_is_not', '_!='] : ['_is', '_='];
 
         if (Str::endsWith($key, $type)) {
+            $type = Str::endsWith($key, $type[0]) ? $type[0] : $type[1];
             $column = $this->getTable() . '.' . Str::before($key, $type);
 
             if ($value === null) {
@@ -215,11 +211,12 @@ abstract class Model extends LaravelModel
 
     // If the given string 'key' ends with _is_in or _is_not.
     // Then: Add an whereIn or WhereNotIn statement to the given 'query'.
-    protected function filterOnIsInArray($query, string $key, $value, bool $not = false) 
+    protected function filterOnIsInArray($query, string $key, $value, bool $not = false)
     {
-        $type = $not ? '_is_not_in' : '_is_in';
+        $type = $not ? ['_is_not_in', '_!='] : ['_is_in', '_='];
 
         if (Str::endsWith($key, $type)) {
+            $type = Str::endsWith($key, $type[0]) ? $type[0] : $type[1];
             $column = $this->getTable() . '.' . Str::before($key, $type);
             $query = $query->whereIn($column, $value, 'and', $not);
         }
@@ -244,7 +241,7 @@ abstract class Model extends LaravelModel
 
     // IF an singular or plural version of the given string 'column' exists in the given array 'filters'.
     // Then: Add an the corresponding 'where' statement to the given 'query'.
-    protected function filterColumn($query, array $filters , string $column, bool $not = false) 
+    protected function filterColumn($query, array $filters , string $column, bool $not = false)
     {
         // Set the singular and plural version of the given column 'column',
         // And append '-not' if given the boolean 'not' is true.
@@ -305,6 +302,17 @@ abstract class Model extends LaravelModel
     {
         if (in_array('with_trashed', $filters, true)) {
             $query = $query->withTrashed();
+        }
+
+        return $query;
+    }
+
+    // If only_trashed exists as key in the given array 'filters'.
+    // Then: Add a withTrashed(include deleted_at not null) statement to the given 'query'.
+    protected function addOnlyTrashedStatementToQuery($query, $filters)
+    {
+        if (in_array('only_trashed', $filters, true)) {
+            $query = $query->onlyTrashed();
         }
 
         return $query;
@@ -385,7 +393,7 @@ abstract class Model extends LaravelModel
                 return $query->filter($value);
             });
         }
-            
+
         return $query;
     }
 

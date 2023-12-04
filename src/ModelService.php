@@ -11,12 +11,4 @@ abstract class ModelService
     {
         return call_user_func_array(array($this->repo, $name), $arguments);
     }
-
-    // TODO: add paginate method to repository.php
-    public function paginate($input, $with = [])
-    {
-        $input['per_page'] = array_key_exists('per_page', $input) ? $input['per_page'] : 10;
-
-        return $this->repo->paginate($input, $with);
-    }
 }

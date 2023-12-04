@@ -8,7 +8,7 @@ abstract class Repository {
 
     protected $model;
 
-    public function __construct(Model $model) 
+    public function __construct(Model $model)
     {
         $this->model = $model;
     }
@@ -17,7 +17,7 @@ abstract class Repository {
     {
         return (new $this->model)->filter($filters)->withs($with)->get();
     }
-    
+
     public function first(array $filters = [], array $with = [])
     {
         return (new $this->model)->filter($filters)->withs($with)->first();
@@ -42,8 +42,8 @@ abstract class Repository {
     {
         return $this->first(['name' => $name], $with);
     }
-    
-    public function pluckIds(array $filters = []) 
+
+    public function pluckIds(array $filters = [])
     {
         return $this->pluck('id', $filters);
     }
@@ -61,8 +61,8 @@ abstract class Repository {
     {
         return (new $this->model)->filter($filters)->pluck($column, $key);
     }
-    
-    public function count(array $filters = []) 
+
+    public function count(array $filters = [])
     {
         return (new $this->model)->filter($filters)->count();
     }
@@ -91,7 +91,7 @@ abstract class Repository {
         if ($with) {
             $model = (new $this->model)->where('id', $model->id)->withs($with)->first();
         }
-        
+
         return $model;
     }
 
@@ -179,7 +179,7 @@ abstract class Repository {
         return $model;
     }
 
-    public function destroyMany(array $ids, $forceDelete = false) 
+    public function destroyMany(array $ids, $forceDelete = false)
     {
         if ($forceDelete) {
             return (new $this->model)->whereIn('id', $ids)->forceDelete();
