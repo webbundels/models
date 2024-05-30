@@ -1,0 +1,22 @@
+providers:
+  - Workbench\App\Providers\WorkbenchServiceProvider
+  - Webbundels\Models\WebbundelsModelsServiceProvider
+
+migrations:
+  - workbench/database/migrations
+
+seeders:
+  - Workbench\Database\Seeders\DatabaseSeeder
+
+workbench:
+  start: '/'
+  install: false
+  discovers:
+    web: true
+    api: false
+    commands: false
+    components: false
+    views: false
+  build: []
+  assets: []
+  sync: []

@@ -62,6 +62,6 @@ class ModelMakeJsCommand extends GeneratorCommand
     {
         $name = Str::lower(Str::kebab($this->getNameInput()));
         
-        return './resources/js/models/' . str_replace('\\', '/', $name) . '.js';
+        return base_path('./resources/js/models/' . str_replace('\\', '/', $name) . '.js');
     }
 }

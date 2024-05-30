@@ -64,7 +64,6 @@ class ModelClassesMakeCommand extends GeneratorCommand
             'name' => $plural . '/' . $singular . 'Collection',
             '--collection'
         ]);
-
         $this->call('wb:make:model-service-js', [
             'name' => $singular
         ]);

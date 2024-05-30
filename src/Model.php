@@ -139,7 +139,7 @@ abstract class Model extends LaravelModel
 
         $not = Str::contains($key, ['_not', '_!=']);
         $equal = Str::contains($key, ['_equal', '_<=', '_>=']);
-
+        
         $query = $this->filterOnGreaterThan($query, $key, $value, $equal);
         $query = $this->filterOnLessThan($query, $key, $value, $equal);
         if (! is_array($value)) {
@@ -156,7 +156,7 @@ abstract class Model extends LaravelModel
     // Then: Add the corresponding where statement to the given 'query'.
     protected function filterOnGreaterThan($query, string $key, $value, bool $equal = false)
     {
-        $type = $equal ? ['_>=', '_is_greater_or_equal_than'] : ['_>', '_greater_than'];
+        $type = $equal ? ['_>=', '_is_greater_or_equal_than'] : ['_>', '_is_greater_than'];
 
         if (Str::endsWith($key, $type)) {
             $type = Str::endsWith($key, $type[0]) ? $type[0] : $type[1];

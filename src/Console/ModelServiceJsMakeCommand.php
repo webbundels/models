@@ -105,7 +105,7 @@ class ModelServiceJsMakeCommand extends GeneratorCommand
     {
         $name = Str::lower(Str::kebab($this->getNameInput()));
 
-        return './resources/js/services/http/' . str_replace('\\', '/', $name) . '-service.js';
+        return base_path('./resources/js/services/http/' . str_replace('\\', '/', $name) . '-service.js');
     }
 
     // Build the content of the ModelService class by the given string 'name'.
