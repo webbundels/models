@@ -148,21 +148,24 @@ class RepositoryTest extends \Orchestra\Testbench\TestCase
     /** @test */
     public function test_store_many()
     {
-        App::make('UserService')->store([
-            'name' => 'Peter Poffertjes',
-            'email' => 'peter@poffertje.nl',
-            'type_id' => Type::first()->id,
-            'coins' => 77,
-            'password' => '1234'
-        ], [
-            'name' => 'Memphis de Paai',
-            'email' => 'memphis@paai.nl',
-            'type_id' => Type::first()->id,
-            'coins' => 104,
-            'password' => '1234'
+        App::make('UserService')->storeMany([
+            [
+                'name' => 'Peter Poffertjes',
+                'email' => 'peter@poffertje.nl',
+                'type_id' => Type::first()->id,
+                'coins' => 77,
+                'password' => '1234'
+            ], [
+                'name' => 'Memphis de Paai',
+                'email' => 'memphis@paai.nl',
+                'type_id' => Type::first()->id,
+                'coins' => 104,
+                'password' => '1234'
+            ]
         ]);
 
         $userNames = App::make('UserService')->get(['name_is_in' => ['Peter Poffertjes', 'Memphis de Paai']])->pluck('name')->all();
+        
         $this->assertEquals($userNames, ['Peter Poffertjes', 'Memphis de Paai']);
     }
 
@@ -180,7 +183,7 @@ class RepositoryTest extends \Orchestra\Testbench\TestCase
         ]);
         $newCount = App::make('UserService')->count();
 
-        $this->assertTrue($newCount !== $count+1);
+        $this->assertTrue($newCount === $count+1);
 
         App::make('UserService')->firstOrStore([
             'name' => 'Bert van der Ernie',
@@ -191,7 +194,7 @@ class RepositoryTest extends \Orchestra\Testbench\TestCase
         ]);
         $newCount = App::make('UserService')->count();
 
-        $this->assertTrue($newCount !== $count+1);
+        $this->assertTrue($newCount === $count+1);
     }
 
     /** @test */
@@ -209,11 +212,11 @@ class RepositoryTest extends \Orchestra\Testbench\TestCase
         $user = App::make('UserService')->getByName('Zac ff On');
 
         $this->assertTrue($user !== null);
-        $this->assertTrue($user->coins !== 88);
+        $this->assertTrue($user->coins === 88);
 
         App::make('UserService')->updateOrCreate([
-            'name' => 'Bert van der Ernie',
-            'email' => 'bert@ernie.nl',
+            'name' => 'Zac ff On',
+            'email' => 'zac@on.nl',
             'type_id' => Type::first()->id,
             'password' => '1234',
         ], [
@@ -222,34 +225,56 @@ class RepositoryTest extends \Orchestra\Testbench\TestCase
 
         $user = App::make('UserService')->getByName('Zac ff On');
 
-        $this->assertTrue($user->coins !== 99);
+        $this->assertTrue($user->coins === 99);
     }
 
     /** @test */
     public function test_update()
     {
-        $user = App::make('UserService')->getByName('Zac ff On');
-        App::make('UserService')->update($user->id, ['coins' => 101]);
+        $user = App::make('UserService')->store([
+            'name' => 'Eric klaptaan',
+            'email' => 'Eric@klaptaan.nl',
+            'type_id' => Type::first()->id,
+            'coins' => 11,
+            'password' => '1234'
+        ]);
+        $user = App::make('UserService')->update($user->id, ['coins' => 30]);
 
-        $this->assertTrue($user->coins !== 101);
+        $this->assertTrue($user->coins === 30);
     }
 
     /** @test */
     public function test_update_filtered()
     {
-        App::make('UserService')->updateFiltered(['name_is' => 'Zac ff On'], ['coins' => 102]);
+        $user = App::make('UserService')->store([
+            'name' => 'Walt Dist Niet',
+            'email' => 'walt@dist.nl',
+            'type_id' => Type::first()->id,
+            'coins' => 142,
+            'password' => '1234'
+        ]);
 
-        $user = App::make('UserService')->getByName('Zac ff On');
-        $this->assertTrue($user->coins === 102);
+        App::make('UserService')->updateFiltered(['name_is' => 'Walt Dist Niet'], ['coins' => 88]);
+
+        $user = App::make('UserService')->getByName('Walt Dist Niet');
+        $this->assertTrue($user->coins === 88);
     }
 
     /** @test */
     public function test_destroy()
     {
-        $user = App::make('UserService')->getByName('Zac ff On');
+        $user = App::make('UserService')->store([
+            'name' => 'Ozzy Oz Born',
+            'email' => 'ozzy@born.nl',
+            'type_id' => Type::first()->id,
+            'coins' => 142,
+            'password' => '1234'
+        ]);
+
+        $user = App::make('UserService')->getByName('Ozzy Oz Born');
         App::make('UserService')->destroy($user->id);
 
-        $user = App::make('UserService')->getByName('Zac ff On');
+        $user = App::make('UserService')->getByName('Ozzy Oz Born');
         $this->assertTrue($user === null);
     }
 
@@ -274,7 +299,7 @@ class RepositoryTest extends \Orchestra\Testbench\TestCase
     {
         $user = App::make('UserService')->getById(1);
 
-        $this->assertTrue($user === true);
+        $this->assertTrue($user !== null);
 
         $user = App::make('UserService')->forceDestroy(1);
 
